@@ -1,2 +1,2 @@
 # picup-auth
-picup auth server
+picup auth server for deploy
