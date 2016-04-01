@@ -7,7 +7,6 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('./config');
-var logger = require('morgan');
 var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
@@ -21,7 +20,6 @@ var app = express();
 
 app.set('models', require('./model'));
 
-app.use(logger('dev'));
 app.disable('etag');
 
 app.use(bodyParser.json());
