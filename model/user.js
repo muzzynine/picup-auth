@@ -110,21 +110,22 @@ module.exports = function(connection){
         })
     };
 
-    User.register = function(authId, nickname, authType, fn){
+    User.register = function(authId, nickname, mail, sex, birth, phoneNumber, authType){
         return new Promise(function(resolve, reject){
-            return connection.transaction(function(t){
+            connection.transaction(function(t){
                 return User.create({
                     nickname : nickname,
-                    profile_path : "default"
+                    profile_path : "default",
+		    mail : mail || null,
+		    sex : sex || "unknown",
+		    birth : birth || null,
+		    phoneNumber : phoneNumber || null
                 }, {transaction: t}).then(function(user){
                     return user.createAuth({
                         auth_id : authId,
                         auth_type : authType
                     }, {transaction: t}).then(function(){
                         return user;
-                    }).catch(function(err){
-                        log.error("User#register/DB(RDBMS) Internal error", {err: err});
-                        throw AppError.throwAppError(500);
                     })
                 }).catch(function(err){
                     log.error("User#register", {err: err});
@@ -174,5 +175,6 @@ module.exports = function(connection){
     };
 
     return User;
+
 };
 

@@ -63,7 +63,7 @@ router.post('/connect', function(req, res){
     }).catch(function(err){
         if(err.errorCode === 404){
             var info = err.info;
-            return User.register(info.id, info.properties.nickname, authType).then(function(user){
+            return User.register(info.id, info.properties.nickname, info.properties.mail, info.properties.sex, info.properties.birth, info.properties.phoneNumber, authType).then(function(user){
                 res.status(200);
                 res.json({
                     uid : user.id,
