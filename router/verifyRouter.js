@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var router = express.Router();
+var passport = require('passport');
 
 var User = require('../model/user');
 
@@ -30,25 +31,9 @@ module.exports = router;
  *
  */
 
-router.get('/token', function(req, res){
-    var AccessToken = req.app.get('models').accessToken;
-    var needCheck = req.query.accessToken;
-
-    AccessToken.findAccessTokenByValue(needCheck).then(function(token){
-        if(!tokenizer.validate(token)){
-            log.fatal("verifyRouter#Invalid token. expected expired");
-            res.status(403);
-            res.json(AppError.throwAppError(403));
-            return;
-        }
-        return AccessToken.getUserByInstance(token).then(function(user){
-            res.status(200);
-            res.json({
-                uid : user.id
-            });
-        });
-    }).catch(function(err){
-        res.status(err.errorCode);
-        res.json(err);
+router.get('/token', passport.authenticate('bearer', { session : false }), function(req, res){
+    res.status(200);
+    res.json({
+	uid : user.id
     });
 });

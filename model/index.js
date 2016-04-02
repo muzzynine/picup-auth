@@ -43,14 +43,14 @@ models.forEach(function(model){
 
 (function(m){
     m.user.belongsToMany(m.group, {through: 'UserGroup'});
-    m.user.hasOne(m.pushRegistration);
-    m.user.belongsTo(m.auth);
+    m.user.hasOne(m.pushRegistration, {onDelete: 'CASCADE'});
+    m.user.hasOne(m.auth, {onDelete : 'CASCADE'});
     m.group.belongsToMany(m.user, {through: 'UserGroup'});
     m.group.hasMany(m.delta, {as: 'Deltas'});
-    m.auth.hasOne(m.user);
-    m.auth.belongsTo(m.accessToken);
-    m.auth.belongsTo(m.client);
-    m.accessToken.hasOne(m.auth);
+    m.auth.belongsTo(m.user, {onDelete : 'CASCADE'});
+    m.auth.hasOne(m.accessToken, {onDelete : 'CASCADE'});
+    m.auth.hasOne(m.client, {onDelete : 'CASCADE'});
+    m.accessToken.belongsTo(m.auth, {onDelete : 'CASCADE'});
     log.info("index#Database(RDBMS) association set completed");
 })(module.exports);
 
