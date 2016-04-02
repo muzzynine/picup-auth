@@ -108,18 +108,27 @@ module.exports = function(connection){
 
     Auth.generateClientKey = function(auth){
         return new Promise(function(resolve, reject){
-            var newClient = {
-                id : utils.getSHA1HashString(),
-                secret : utils.getSHA1HashString()
-            };
-            return auth.createClient({
-                client_id : newClient.id,
-                client_secret : newClient.secret
-            }).then(function(){
-                resolve(newClient);
-            }).catch(function(err){
-                log.error("Auth#generateClientKey/DB(RDBMS) Internal error", {err: err});
-                reject(AppError.throwAppError(500));
+	    auth.getClient().then(function(client){
+		if(client){
+		    resolve({
+			id : client.client_id,
+			secret : client.client_secret
+		    });
+		} else {
+		    var newClient = {
+			id : utils.getSHA1HashString(),
+			secret : utils.getSHA1HashString()
+		    };
+		    return auth.createClient({
+			client_id : newClient.id,
+			client_secret : newClient.secret
+		    }).then(function(){
+			resolve(newClient);
+		    });
+		}
+	    }).catch(function(err){
+		log.error("Auth#generateClientKey/DB(RDBMS) Internal error", {err: err});
+		reject(AppError.throwAppError(500));
             });
         })
     };
