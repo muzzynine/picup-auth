@@ -78,6 +78,7 @@ router.post('/generateAPIKey', function(req, res){
  */
 var errorHandler = function (err, req, res, next){
     if(err){
+	console.log(err);
         res.status(err.errorCode);
         res.json(err);
         return;

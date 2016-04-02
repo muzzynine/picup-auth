@@ -6,6 +6,8 @@ var UserShceme = require('./scheme').USER;
 var AppError = require('../lib/appError');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('DataModelLogger');
+var Kakao = require('../lib/kakao');
+var Facebook = require('../lib/facebook');
 
 module.exports = function(connection){
     var User = connection.define(UserShceme.TABLE,
@@ -138,6 +140,34 @@ module.exports = function(connection){
                 reject(err);
             });
         });
+    };
+
+    User.signout = function(user){
+	return new Promise(function(resolve, reject){
+	    user.getAuth().then(function(auth){
+		return connection.transaction(function(t){
+		    return user.destroy({transaction : t}).then(function(){
+			if(auth.auth_type === "kakao"){
+			    return Kakao.unlinkUserInfo(auth.auth_id).then(function(){
+				return;
+			    });
+			} else {
+			    throw AppError.throwAppError(400);
+			}
+		    }).catch(function(err){
+			console.log(err);
+			throw err;
+		    });
+		}).then(function(){
+		    resolve();
+		});
+	    }).catch(function(err){
+		if(err.isAppError){
+		    return reject(err);
+		}
+		reject(AppError.throwAppError(500));
+	    });
+	});
     };
 
 

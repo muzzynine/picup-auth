@@ -8,6 +8,7 @@ var router = express.Router();
 var appError = require('../lib/appError');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('RouterLogger');
+var passport = require('passport');
 
 
 router.post('/signin', function(req, res){
@@ -81,35 +82,45 @@ router.post('/connect', function(req, res){
     });
 });
 
-
-/**
- * 로그아웃을 한다
- */
 /*
-router.post('/signout', passport.authenticate('bearer', { session: false}),
-    oauth2.error(), function(req, res){
-        var data = req.body;
-        var username = data.username;
+ * 서비스에서 탈퇴한다.
+ * 유저 정보와 연관된 모든 정보를 삭제한다.
+ *
+ * @apiSuccess {String} good bye 고정 메시지
+ *
+ * @apiError 403 인증 오류
+ * @apiError 400 kakao 계정이 아님
+ * @apiError 404 정보가 존재하지 않음
+ * @apiError 500 서버 오류
+ *
+ */
 
-        accessToken.remove({
-            username: username
-        }, function(err){
-            if(err){
-                res.status(500);
-                res.json({
-                    error: err.name,
-                    error_description: err.message
-                });
-                return;
-            }
-            res.status(200);
-            res.json({
-                good: "bye"
-            });
-        });
-    }
-);
-*/
+
+
+router.delete('/connect', passport.authenticate('bearer', { session: false }), function(req, res){
+    var User = req.app.get('models').user;
+
+    User.signout(req.user).then(function(){
+	res.status(200);
+	res.json({
+	    good : "bye"
+	});
+    }).catch(function(err){
+	res.status(err.errorCode);
+	res.json(err);
+    });
+});
+
 
 
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
