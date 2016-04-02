@@ -34,6 +34,6 @@ module.exports = router;
 router.get('/token', passport.authenticate('bearer', { session : false }), function(req, res){
     res.status(200);
     res.json({
-	uid : user.id
+	uid : req.user.id
     });
 });
