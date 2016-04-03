@@ -58,8 +58,15 @@ router.post('/connect', function(req, res){
         }).catch(function(err){
             //일반적인 상황에서 이 catch에 들어오는 예외중 404는 예상하지 못한 오류로 처리해야한다.
             //인증 정보가 있는데 해당 유저가 없다는 경우는 의도하지 않은 경우이기 때문이다.
-            res.status(err.errorCode);
-            res.json(err);
+
+	    log.error("#connect", {err : err}, {stack:err.stack});
+	    if(err.isAppError){
+		res.status(err.errorCode);
+		res.json(err);
+	    } else {
+		res.status(500);
+		res.json({});
+	    }
         });
     }).catch(function(err){
         if(err.errorCode === 404){
@@ -72,12 +79,24 @@ router.post('/connect', function(req, res){
                     auth_type : authType
                 });
             }).catch(function(err){
-                res.status(err.errorCode);
-                res.json(err);
-            })
+		log.error("#connect", {err : err}, {stack:err.stack});
+		if(err.isAppError){
+		    res.status(err.errorCode);
+		    res.json(err);
+		} else {
+		    res.status(500);
+		    res.json({});
+		}
+            });
         } else {
-            res.status(err.errorCode);
-            res.json(err);
+	    log.error("#connect", {err : err}, {stack:err.stack});
+	    if(err.isAppError){
+		res.status(err.errorCode);
+		res.json(err);
+	    } else {
+		res.status(500);
+		res.json({});
+	    }
         }
     });
 });
@@ -106,8 +125,14 @@ router.delete('/connect', passport.authenticate('bearer', { session: false }), f
 	    good : "bye"
 	});
     }).catch(function(err){
-	res.status(err.errorCode);
-	res.json(err);
+	log.error("#signout", {err : err}, {user : req.user.id}, {stack:err.stack});
+	if(err.isAppError){
+	    res.status(err.errorCode);
+	    res.json(err);
+	} else {
+	    res.status(500);
+	    res.json({});
+	}
     });
 });
 

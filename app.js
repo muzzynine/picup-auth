@@ -6,8 +6,12 @@
  */
 var express = require('express');
 var bodyParser = require('body-parser');
+<<<<<<< Updated upstream
 var config = require('./config');
 var logger = require('morgan');
+=======
+var config = require('./config/config');
+>>>>>>> Stashed changes
 var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
@@ -21,7 +25,17 @@ var app = express();
 
 app.set('models', require('./model'));
 
+<<<<<<< Updated upstream
 app.use(logger('dev'));
+=======
+if(process.env.NODE_ENV == 'development'){
+    console.log("Server running Development Mode");
+    app.use(require('morgan')('dev'));
+} else if(process.env.NODE_ENV == 'production'){
+    console.log("Server running Production Mode");
+}
+
+>>>>>>> Stashed changes
 app.disable('etag');
 
 app.use(bodyParser.json());

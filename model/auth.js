@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var AuthScheme = require('./scheme').AUTH;
 
 var AppError = require('../lib/appError');
-var config = require('../config');
+var config = require('../config/config');
 var utils = require('../util/utils');
 var Kakao = require('../lib/kakao');
 var Facebook = require('../lib/facebook');
@@ -29,12 +29,14 @@ module.exports = function(connection){
                        * 따라서 여기서는 그대로 #findUserByOAuthId에서 발생하는 에러를 상위로 던진다.
                        * Mongo Legacy.
                        */
-                       err.info = info;
-                       return reject(err);
+			err.info = info;
+			throw err;
                    });
-               }).catch(function(err){
-                   log.error("Auth#authenticate/kakao module error", {err: err});
-                   return reject(err);
+		}).catch(function(err){
+		    if(err.isAppError){
+			return reject(err);
+		    }
+		    reject(AppError.throwAppError(500, err.toString()));
                });
            } else if (authType === config.OAUTH.TYPE.FACEBOOK){
                return Facebook.getUserInfo(accessToken).then(function(info){
@@ -47,32 +49,36 @@ module.exports = function(connection){
                         * Mongo Legacy.
                         */
                        err.info = info;
-                       return reject(err);
+                       throw err;
                    });
                }).catch(function(err){
-                   log.error("Auth#authenticate/facebook module error", {err: err});
-                   return reject(err);
+		   if(err.isAppError){
+		       return reject(err);
+		   }
+		   reject(AppError.throwAppError(500, err.toString()));
+
                });
            }
-           else {
-               log.error("Auth#authenticate/not supported auth type");
-               reject(AppError.throwAppError(412));
+            else {
+		reject(AppError.throwAppError(412, "Not supported 3rd party auth type"));
            }
        })
     };
 
     Auth.getUser = function(auth){
         return new Promise(function(resolve, reject){
-            return auth.getUser().then(function(user){
+            auth.getUser().then(function(user){
                 if(!user){
-                    return reject(AppError.throwAppError(404));
+                    throw AppError.throwAppError(404, "Not exist user info match with auth info");
                 }
                 resolve(user);
             }).catch(function(err){
-                log.error("Auth#getUser/DB(RDBMS) Internal error", {err: err});
-                reject(AppError.throwAppError(500));
-            })
-        })
+		if(err.isAppError){
+		    return reject(err);
+		}
+		reject(AppError.throwAppError(500, err.toString()));
+            });
+        });
     };
 
     Auth.getAccessToken = function(auth){
@@ -127,8 +133,10 @@ module.exports = function(connection){
 		    });
 		}
 	    }).catch(function(err){
-		log.error("Auth#generateClientKey/DB(RDBMS) Internal error", {err: err});
-		reject(AppError.throwAppError(500));
+		if(err.isAppError){
+		    return reject(err);
+		}
+		reject(AppError.throwAppError(500, err.toString()));
             });
         })
     };
@@ -159,16 +167,17 @@ module.exports = function(connection){
                 }
             }).then(function(auth){
                 if(!auth){
-                    return reject(AppError.throwAppError(404));
+                    throw AppError.throwAppError(404, "Not exist auth info");
                 }
-                return resolve(auth);
+                resolve(auth);
             }).catch(function(err){
-                log.error("Auth#getAuthInfoByOAuthId/DB(RDBMS) Internal error", {err: err});
-                return reject(AppError.throwAppError(500));
-            })
-        })
+		if(err.isAppError){
+		    return reject(err);
+		}
+		reject(AppError.throwAppError(500, err.toString()));
+            });
+        });
     };
-
 
     return Auth;
 };
