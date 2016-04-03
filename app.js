@@ -6,7 +6,6 @@
  */
 var express = require('express');
 var bodyParser = require('body-parser');
-var logger = require('morgan');
 var config = require('./config/config');
 var passport = require('passport');
 var logging = require('./lib/logger');

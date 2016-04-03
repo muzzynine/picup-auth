@@ -18,8 +18,9 @@
     "sequelize": "^3.17.1",
     "validate.js": "^0.9.0"
   },
-    "devDependencies": {
-	"should": "^7.1.1",
-	"jshint": "^2.8.0"
+  "devDependencies": {
+    "jshint": "^2.8.0",
+    "morgan": "^1.7.0",
+    "should": "^7.1.1"
   }
 }
