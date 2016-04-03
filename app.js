@@ -6,7 +6,8 @@
  */
 var express = require('express');
 var bodyParser = require('body-parser');
-var config = require('./config');
+var logger = require('morgan');
+var config = require('./config/config');
 var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
@@ -19,6 +20,13 @@ var auth = require('./lib/auth');
 var app = express();
 
 app.set('models', require('./model'));
+
+if(process.env.NODE_ENV == 'development'){
+    console.log("Server running Development Mode");
+    app.use(require('morgan')('dev'));
+} else if(process.env.NODE_ENV == 'production'){
+    console.log("Server running Production Mode");
+}
 
 app.disable('etag');
 

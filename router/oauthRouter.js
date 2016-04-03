@@ -47,8 +47,14 @@ router.post('/generateAPIKey', function(req, res){
             });
         });
     }).catch(function(err){
-        res.status(err.errorCode);
-        res.json(err);
+	log.error("#generateAPIKey", {err:err}, {stack:err.stack});
+	if(err.isAppError){
+	    res.status(err.errorCode);
+	    res.json(err);
+	} else {
+	    res.status(500);
+	    res.json({});
+	}
     });
 });
 
@@ -78,7 +84,6 @@ router.post('/generateAPIKey', function(req, res){
  */
 var errorHandler = function (err, req, res, next){
     if(err){
-	console.log(err);
         res.status(err.errorCode);
         res.json(err);
         return;
