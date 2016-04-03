@@ -130,14 +130,15 @@ module.exports = function(connection){
                         return user;
                     })
                 }).catch(function(err){
-                    log.error("User#register", {err: err});
-                    throw AppError.throwAppError(500);
+		    throw err;
                 });
             }).then(function(user){
                 resolve(user);
             }).catch(function(err){
-                log.error("User#register/Transaction failed", {err: err});
-                reject(err);
+		if(err.isAppError){
+		    return reject(err);
+		}
+                reject(AppError.throwAppError(500, err.toString()));
             });
         });
     };
@@ -152,10 +153,9 @@ module.exports = function(connection){
 				return;
 			    });
 			} else {
-			    throw AppError.throwAppError(400);
+			    throw AppError.throwAppError(400, "signout is support only kakao account");
 			}
 		    }).catch(function(err){
-			console.log(err);
 			throw err;
 		    });
 		}).then(function(){
@@ -165,7 +165,7 @@ module.exports = function(connection){
 		if(err.isAppError){
 		    return reject(err);
 		}
-		reject(AppError.throwAppError(500));
+		reject(AppError.throwAppError(500, err.toString()));
 	    });
 	});
     };
