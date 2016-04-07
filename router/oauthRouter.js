@@ -7,6 +7,8 @@ var express = require("express");
 var router = express.Router();
 
 var passport = require('passport');
+
+var auth = require('../lib/auth');
 var oauth2 = require('../lib/oauth2');
 
 var bunyan = require('bunyan');
@@ -95,11 +97,9 @@ router.post('/token',
     function(req, res, next){
         next();
     },*/
-    passport.authenticate('oauth2-resource-owner-password', {session : false}),
-    oauth2.token(),
-    errorHandler
-);
-
+	    passport.authenticate('oauth2-resource-owner-password', {session : false}),
+	    oauth2.token()
+	   );
 
 /*
 router.use(passport.authenticate('bearer', {session: false}), errorHandler);

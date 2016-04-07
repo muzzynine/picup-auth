@@ -85,32 +85,18 @@ module.exports = function(connection){
         return new Promise(function(resolve, reject){
             return auth.getAccessToken().then(function (token) {
                 if (!token) {
-                    return reject(AppError.throwAppError(404));
+                    return reject(AppError.throwAppError(404), "Not exist token");
                 }
                 resolve(token);
             }).catch(function(err){
-                log.error("Auth#getAccessToken/DB(RDBMS) Internal error", {err: err});
-                reject(AppError.throwAppError(500));
-            })
-        })
+		if(err.isAppError){
+		    reject(err);
+		} else {
+                    reject(AppError.throwAppError(500, err.toString()));
+		}
+            });
+        });
     };
-
-    Auth.setAccessToken = function(auth, token){
-        return new Promise(function(resolve, reject){
-            return auth.createAccessToken({
-                access_token : token.access_token,
-                refresh_token : token.refresh_token,
-                expired_in : token.expired_in,
-                created_time : token.created_time
-            }).then(function(){
-                resolve(token);
-            }).catch(function(err){
-                log.error("Auth#setAccessToken/DB(RDBMS) Internal error", {err: err});
-                reject(AppError.throwAppError(500));
-            })
-        })
-    };
-
 
     Auth.generateClientKey = function(auth){
         return new Promise(function(resolve, reject){
@@ -145,17 +131,19 @@ module.exports = function(connection){
         return new Promise(function(resolve, reject){
             return auth.getClient().then(function(client){
                 if(!client){
-                    return reject(AppError.throwAppError(404));
+                    throw AppError.throwAppError(404, "Not exist client");
                 }
                 if(client.client_id === clientId && client.client_secret === clientSecret){
                     return resolve(auth);
                 }
-                reject(AppError.throwAppError(403));
+                throw AppError.throwAppError(401, "Client id, client secret authentication failed");
             }).catch(function(err){
-                log.error("Auth#verify/DB(RDBMS) Internal error", {err: err});
-                reject(AppError.throwAppError(500));
+		if(err.isAppError){
+		    return reject(err);
+		}
+		reject(AppError.throwAppError(500, err.toString()));
             });
-        })
+        });
     };
 
     Auth.getAuthInfoByOAuthId = function(id, authType){
