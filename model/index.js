@@ -2,11 +2,6 @@
  * Created by impyeong-gang on 1/11/16.
  */
 var config = require('../config/config').DB.MYSQL;
-var user = require('./user');
-var group = require('./group');
-var delta = require('./delta');
-var accessToken = require('./accessToken');
-var client = require('./client');
 var Sequelize = require('sequelize');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('DatabaseConnectLogger');
