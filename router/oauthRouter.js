@@ -98,8 +98,7 @@ router.post('/token',
     passport.authenticate('oauth2-resource-owner-password', {session : false}),
     oauth2.token(),
     errorHandler
-);
-
+	   );
 
 /*
 router.use(passport.authenticate('bearer', {session: false}), errorHandler);

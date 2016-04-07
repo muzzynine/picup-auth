@@ -34,7 +34,8 @@ var models = [
     'group',
     'pushRegistration',
     'user',
-    'auth'
+    'auth',
+    'ban'
 ];
 
 models.forEach(function(model){
@@ -50,6 +51,7 @@ models.forEach(function(model){
     m.auth.belongsTo(m.user, {onDelete : 'CASCADE'});
     m.auth.hasOne(m.accessToken, {onDelete : 'CASCADE'});
     m.auth.hasOne(m.client, {onDelete : 'CASCADE'});
+    m.auth.hasMany(m.ban, {onDelete : 'CASCADE'});
     m.accessToken.belongsTo(m.auth, {onDelete : 'CASCADE'});
     log.info("index#Database(RDBMS) association set completed");
 })(module.exports);

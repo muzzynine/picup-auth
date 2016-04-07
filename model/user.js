@@ -125,10 +125,11 @@ module.exports = function(connection){
                 }, {transaction: t}).then(function(user){
                     return user.createAuth({
                         auth_id : authId,
-                        auth_type : authType
+                        auth_type : authType,
+			isBan : false
                     }, {transaction: t}).then(function(){
                         return user;
-                    })
+                    });
                 }).catch(function(err){
 		    throw err;
                 });

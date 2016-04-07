@@ -95,6 +95,24 @@ module.exports = function(connection){
         })
     };
 
+    Auth.addBan = function(auth, ban){
+	return new Promise(function(resolve, reject){
+	    if(auth.isBan){
+		throw AppError.throwAppError(400, "already banned user");
+	    }
+	    auth.addBanInfo(ban).then(function(){
+		auth.isBan = true;
+		return auth.save().then(function(){
+		    resolve();
+		});
+	    }).catch(function(err){
+		reject(AppError.throwAppError(500, err.toString()))
+	    });
+	});
+    };
+		      
+		    
+
     Auth.setAccessToken = function(auth, token){
         return new Promise(function(resolve, reject){
             return auth.createAccessToken({
