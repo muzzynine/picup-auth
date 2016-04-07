@@ -18,14 +18,17 @@ module.exports = function(connection){
                 }
             }).then(function(token){
                 if(!token){
-                    return reject(AppError.throwAppError(404));
+                    return reject(AppError.throwAppError(404, "Not exist token"));
                 }
                 resolve(token);
             }).catch(function(err){
-                log.error("AccessToken#findAccessTokenByValue", {err: err});
-                reject(AppError.throwAppError(500));
+		if(err.isAppError){
+		    reject(err);
+		} else {
+		    reject(AppError.throwAppError(500, err.toString()));
+		}
             });
-        })
+        });
     };
 
     AccessToken.getAuthInfoByAccessToken = function(accessToken){
