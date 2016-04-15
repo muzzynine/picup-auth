@@ -25,9 +25,10 @@ if(process.env.NODE_ENV == 'development'){
     app.use(require('morgan')('dev'));
 } else if(process.env.NODE_ENV == 'production'){
     console.log("Server running Production Mode");
+    process.on('uncaughtException', function(err){
+	log.fatal("UncaughtExceptionEmit", {err : err.toString()}, {stack : err.stack});
+    });
 }
-
-app.disable('etag');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
