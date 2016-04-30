@@ -11,6 +11,7 @@ var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('MainLogger');
+var SessionStore = require('./lib/session');
 
 
 var oauth = require('./lib/oauth2');
@@ -19,6 +20,7 @@ var auth = require('./lib/auth');
 var app = express();
 
 app.set('models', require('./model'));
+app.set('session', new SessionStore(config.SESSION));
 
 if(process.env.NODE_ENV == 'development'){
     console.log("Server running Development Mode");

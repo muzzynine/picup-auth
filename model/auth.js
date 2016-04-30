@@ -15,7 +15,7 @@ var log = bunyan.getLogger('DataModelLogger');
 
 
 module.exports = function(connection){
-    var Auth = connection.define(AuthScheme.TABLE, AuthScheme.SCHEME);
+    var Auth = connection.define(AuthScheme.TABLE, AuthScheme.SCHEME, AuthScheme.OPTION);
 
     Auth.authenticate = function(accessToken, authType){
 	return new Promise(function(resolve, reject){
@@ -103,8 +103,8 @@ module.exports = function(connection){
 	    auth.getClient().then(function(client){
 		if(client){
 		    resolve({
-			id : client.client_id,
-			secret : client.client_secret
+			id : client.clientId,
+			secret : client.clientSecret
 		    });
 		} else {
 		    var newClient = {
@@ -112,8 +112,8 @@ module.exports = function(connection){
 			secret : utils.getSHA1HashString()
 		    };
 		    return auth.createClient({
-			client_id : newClient.id,
-			client_secret : newClient.secret
+			clientId : newClient.id,
+			clientSecret : newClient.secret
 		    }).then(function(){
 			resolve(newClient);
 		    });
@@ -133,7 +133,7 @@ module.exports = function(connection){
                 if(!client){
                     throw AppError.throwAppError(404, "Not exist client");
                 }
-                if(client.client_id === clientId && client.client_secret === clientSecret){
+                if(client.clientId === clientId && client.clientSecret === clientSecret){
                     return resolve(auth);
                 }
                 throw AppError.throwAppError(401, "Client id, client secret authentication failed");
@@ -150,8 +150,8 @@ module.exports = function(connection){
         return new Promise(function(resolve, reject){
             return Auth.findOne({
                 where : {
-                    auth_id: id,
-                    auth_type: authType
+                    authId: id,
+                    authType: authType
                 }
             }).then(function(auth){
                 if(!auth){

@@ -8,7 +8,7 @@ var bunyan = require('bunyan');
 var log = bunyan.getLogger('DataModelLogger');
 
 module.exports = function(connection){
-    var Delta =  connection.define(DeltaScheme.TABLE, DeltaScheme.SCHEME);
+    var Delta =  connection.define(DeltaScheme.TABLE, DeltaScheme.SCHEME, DeltaScheme.OPTION);
 
     Delta.findDeltaById = function(id){
         return new Promise(function(resolve, reject){
@@ -27,3 +27,4 @@ module.exports = function(connection){
 
     return Delta;
 };
+

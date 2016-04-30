@@ -53,7 +53,7 @@ router.post('/connect', function(req, res){
             res.json({
                 uid: existUser.id,
                 nickname: existUser.nickname,
-                auth_type: authType
+                authType: authType
             });
         }).catch(function(err){
             //일반적인 상황에서 이 catch에 들어오는 예외중 404는 예상하지 못한 오류로 처리해야한다.

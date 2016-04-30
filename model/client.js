@@ -16,8 +16,8 @@ module.exports = function(connection){
         return new Promise(function(resolve, reject){
             return Client.findOne({
                 where : {
-                    client_id : clientId,
-                    client_secret : clientSecret
+                    clientId : clientId,
+                    clientSecret : clientSecret
                 }
             }).then(function(client){
                 if(!client){

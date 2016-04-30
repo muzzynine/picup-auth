@@ -18,12 +18,12 @@ var uuid = require('uuid');
  */
 var createToken = function(grantType, scope){
     var token = {};
-    token.access_token = uuid.v1();
-    if(grantType.token_refreshable){
-        token.refresh_token = uuid.v1();
+    token.accessToken = uuid.v1();
+    if(grantType.tokenRefreshable){
+        token.refreshToken = uuid.v1();
     }
-    token.expired_in = grantType.token_duration;
-    token.created_time = Date.now();
+    token.expiredIn = grantType.tokenDuration;
+    token.createdTime = Date.now();
 
     for(var i in scope){
         token.scope.push(scope[i]);
@@ -33,14 +33,14 @@ var createToken = function(grantType, scope){
 };
 
 var refreshToken = function(token){
-    token.access_token = uuid.v1();
-    token.created_time = Date.now();
+    token.accessToken = uuid.v1();
+    token.createdTime = Date.now();
     return token;
 };
 
 var validateToken = function(token){
-    if((Date.now() - token.created_time) > (token.expired_in * 1000)){
-        return false
+    if((Date.now() - token.createdTime) > (token.expiredIn * 1000)){
+        return false;
     }
     return true;
 };

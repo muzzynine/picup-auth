@@ -92,44 +92,22 @@ var errorHandler = function (err, req, res, next){
     }
     next();
 };
-router.post('/token',
-	    /*
-    function(req, res, next){
-        next();
-    },*/
-	    passport.authenticate('oauth2-resource-owner-password', {session : false}),
-	    oauth2.token()
-	   );
-
-/*
-router.use(passport.authenticate('bearer', {session: false}), errorHandler);
 
 
+router.post('/token', function(req, res, next){
+    passport.authenticate('oauth2-resource-owner-password', {session : false}, function(err, authInfo){
+	if(err){
+	    if(err.isAppError){
+		res.status(err.errorCode);
+		res.json(err);
+	    } else {
+		res.status(500);
+		res.json({});
+	    }
+	    return;
+	}
+	req.user = authInfo;
+	next();
+    })(req, res, next);
+}, oauth2.token());
 
-router.post('/logout', function(req, res){
-    var uid = req.user.id;
-    var clientId = req.user.client_id;
-
-    console.log(uid);
-    console.log(clientId);
-
-    Client.getClientById(clientId, function(err, client){
-        if(err) {
-            res.status(err.errorCode);
-            res.json(err);
-            return;
-        }
-        AccessToken.deleteTokenByUidCid(uid, client.client_id, function(err){
-            if(err){
-                res.status(err.errorCode);
-                res.json(err);
-                return;
-            }
-            res.status(200);
-            res.json({
-                thanks : "bye"
-            });
-        });
-    })
-});
-*/

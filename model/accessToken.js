@@ -8,17 +8,17 @@ var bunyan = require('bunyan');
 var log = bunyan.getLogger('DataModelLogger');
 
 module.exports = function(connection){
-    var AccessToken =  connection.define(AccessTokenScheme.TABLE, AccessTokenScheme.SCHEME);
+    var AccessToken =  connection.define(AccessTokenScheme.TABLE, AccessTokenScheme.SCHEME, AccessTokenScheme.OPTION);
 
     AccessToken.findAccessTokenByValue = function(inputToken){
         return new Promise(function(resolve, reject){
             return AccessToken.findOne({
                 where : {
-                    access_token : inputToken
+                    accessToken : inputToken
                 }
             }).then(function(token){
                 if(!token){
-                    return reject(AppError.throwAppError(404, "Not exist token"));
+                    throw AppError.throwAppError(404, "Not exist token");
                 }
                 resolve(token);
             }).catch(function(err){

@@ -10,18 +10,7 @@ var Kakao = require('../lib/kakao');
 var Facebook = require('../lib/facebook');
 
 module.exports = function(connection){
-    var User = connection.define(UserShceme.TABLE,
-        UserShceme.SCHEME, {
-            instanceMethods: {
-                getProfile : function(){
-                    return {
-                        uid : user.id,
-                        nickname : user.nickname,
-                        pic_s3path : user.profile_path
-                    }
-                }
-            }
-        });
+    var User = connection.define(UserShceme.TABLE, UserShceme.SCHEME, UserShceme.OPTION);
 
     User.findUserById = function(uid){
         return new Promise(function(resolve, reject){
@@ -47,7 +36,7 @@ module.exports = function(connection){
                 resolve({
                     uid : user.id,
                     nickname : user.nickname,
-                    pic_s3path : user.profile_path
+                    picS3path : user.profilePath
                 })
             }).catch(function(err){
                 log.error("User#getProfile", {err: err});
@@ -91,10 +80,10 @@ module.exports = function(connection){
                         return reject(AppError.throwAppError(403));
                     }
                     auth.createAccessToken({
-                        access_token : token.access_token,
-                        refresh_token : token.refresh_token,
-                        expired_in : token.expired_in,
-                        created_date : token.created_date
+                        accessToken : token.accessToken,
+                        refreshToken : token.refreshToken,
+                        expiredIn : token.expiredIn,
+                        createdDate : token.createdDate
                     }).then(function(){
                         resolve(token);
                     }).catch(function(err){
@@ -117,15 +106,15 @@ module.exports = function(connection){
             connection.transaction(function(t){
                 return User.create({
                     nickname : nickname,
-                    profile_path : "default",
+                    profilePath : "default",
 		    mail : mail || null,
 		    sex : sex || "unknown",
 		    birth : birth || null,
 		    phoneNumber : phoneNumber || null
                 }, {transaction: t}).then(function(user){
                     return user.createAuth({
-                        auth_id : authId,
-                        auth_type : authType,
+                        authId : authId,
+                        authType : authType,
 			isBan : false
                     }, {transaction: t}).then(function(){
                         return user;
@@ -149,8 +138,8 @@ module.exports = function(connection){
 	    user.getAuth().then(function(auth){
 		return connection.transaction(function(t){
 		    return user.destroy({transaction : t}).then(function(){
-			if(auth.auth_type === "kakao"){
-			    return Kakao.unlinkUserInfo(auth.auth_id).then(function(){
+			if(auth.authType === "kakao"){
+			    return Kakao.unlinkUserInfo(auth.authId).then(function(){
 				return;
 			    });
 			} else {
@@ -175,7 +164,7 @@ module.exports = function(connection){
     User.findUserByOAuthId = function(authId, authType, fn){
         return new Promise(function(resolve, reject){
             return User.findOne({
-                auth_id : authId
+                authId : authId
             }).then(function(users){
                 var uList = users.slice(0);
                 var targetUser = null;
