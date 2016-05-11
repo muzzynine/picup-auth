@@ -12,7 +12,7 @@ var logging = require('./lib/logger');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('MainLogger');
 var SessionStore = require('./lib/session');
-
+var Promise = require('bluebird');
 
 var oauth = require('./lib/oauth2');
 var auth = require('./lib/auth');
@@ -25,6 +25,12 @@ app.set('session', new SessionStore(config.SESSION));
 if(process.env.NODE_ENV == 'development'){
     console.log("Server running Development Mode");
     app.use(require('morgan')('dev'));
+
+    //Sequelize query log printed std out
+    Promise.config({
+	warnings : true
+    });
+
 } else if(process.env.NODE_ENV == 'production'){
     console.log("Server running Production Mode");
     process.on('uncaughtException', function(err){
@@ -37,7 +43,6 @@ app.use(bodyParser.urlencoded({extended : false}));
 
 app.use(passport.initialize());
 app.use(passport.session());
-//auth.setSession(app);
 
 auth.setPassportStrategy();
 oauth.init();

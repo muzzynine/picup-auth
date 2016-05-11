@@ -5,7 +5,7 @@
  */
 var express = require('express');
 var router = express.Router();
-var appError = require('../lib/appError');
+var AppError = require('../lib/appError');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('RouterLogger');
 var passport = require('passport');
@@ -118,8 +118,20 @@ router.post('/connect', function(req, res){
 
 router.delete('/connect', passport.authenticate('bearer', { session: false }), function(req, res){
     var User = req.app.get('models').user;
+    var session = req.app.get('session');
 
-    User.signout(req.user).then(function(){
+    var reason = req.body.reason;
+
+    var user = User.build(req.user, {isNewRecord:false});
+    var token = req.headers.authorization.split(' ')[1];
+
+    User.signout(user, reason).then(function(){
+	return session.destroy(token).then(function(){
+	    return;
+	}).catch(function(err){
+	    return;
+	});
+    }).then(function(){
 	res.status(200);
 	res.json({
 	    good : "bye"

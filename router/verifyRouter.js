@@ -15,16 +15,6 @@ var log = bunyan.getLogger('VerifyRouter');
 
 module.exports = router;
 
-
-var errorHandler = function(){
-    return function(err, req, res, next){
-	console.log(err);
-	console.log(req);
-	console.log(res);
-	console.log(next);
-    }
-}
-
 /**
  * @api {get} /verify/token 요청의 액세스토큰을 검증한다.
  * @apiGroup Auth

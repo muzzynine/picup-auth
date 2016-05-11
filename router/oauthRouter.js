@@ -44,8 +44,8 @@ router.post('/generateAPIKey', function(req, res){
         return Auth.generateClientKey(authInfo).then(function(clientInfo){
             res.status(200);
             res.json({
-                access_key : clientInfo.id,
-                secret_key : clientInfo.secret
+                access_key : clientInfo.clientId,
+                secret_key : clientInfo.clientSecret
             });
         });
     }).catch(function(err){
@@ -97,6 +97,7 @@ var errorHandler = function (err, req, res, next){
 router.post('/token', function(req, res, next){
     passport.authenticate('oauth2-resource-owner-password', {session : false}, function(err, authInfo){
 	if(err){
+	    log.error("#oauthToken", {err : err}, {stack:err.stack});
 	    if(err.isAppError){
 		res.status(err.errorCode);
 		res.json(err);

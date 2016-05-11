@@ -25,7 +25,7 @@ module.exports = {
     SESSION : {
 	url : 'redis://127.0.0.1:6379',
 	//develop option
-	disableTTL : true
+	disableTTL : false
     },
 
 
