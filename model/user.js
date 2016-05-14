@@ -38,7 +38,6 @@ module.exports = function(connection){
     };
 
     User.signout = function(user, reason){
-	console.log(reason);
 	return user.getAuth().then(function(auth){
 	    if(auth.authType !== "kakao" && auth.authType !== "facebook"){
 		throw AppError.throwAppError(400, "signout is support only kakao account");

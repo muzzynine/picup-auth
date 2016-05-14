@@ -20,10 +20,11 @@ var auth = require('./lib/auth');
 var app = express();
 
 app.set('models', require('./model'));
-app.set('session', new SessionStore(config.SESSION));
+//session setup
+//app.set('session', new SessionStore(config.SESSION));
 
 if(process.env.NODE_ENV == 'development'){
-    console.log("Server running Development Mode");
+    log.info("Server running Development Mode");
     app.use(require('morgan')('dev'));
 
     //Sequelize query log printed std out
@@ -32,7 +33,7 @@ if(process.env.NODE_ENV == 'development'){
     });
 
 } else if(process.env.NODE_ENV == 'production'){
-    console.log("Server running Production Mode");
+    log.info("Server running Production Mode");
     process.on('uncaughtException', function(err){
 	log.fatal("UncaughtExceptionEmit", {err : err.toString()}, {stack : err.stack});
     });
@@ -46,6 +47,14 @@ app.use(passport.session());
 
 auth.setPassportStrategy();
 oauth.init();
+
+
+app.get('/health', function(req, res, next){
+    res.status(200);
+    res.json({});
+    return;
+});
+
 
 var membershipRouter = require('./router/membershipRouter');
 var oauthRouter = require('./router/oauthRouter');
