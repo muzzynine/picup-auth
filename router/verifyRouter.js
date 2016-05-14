@@ -10,8 +10,10 @@ var User = require('../model/user');
 var tokenizer = require('../util/tokenizer');
 var AppError = require('../lib/appError');
 
-module.exports = router;
+var bunyan = require('bunyan');
+var log = bunyan.getLogger('VerifyRouter');
 
+module.exports = router;
 
 /**
  * @api {get} /verify/token 요청의 액세스토큰을 검증한다.
@@ -31,9 +33,43 @@ module.exports = router;
  *
  */
 
-router.get('/token', passport.authenticate('bearer', { session : false }), function(req, res){
-    res.status(200);
-    res.json({
-	uid : req.user.id
-    });
+router.get('/token', function(req, res, next){
+    passport.authenticate('bearer', { session : false }, function(err, user, info){
+	if(err){
+	    log.error("#verify", {err : err}, {stack : err.stack});
+	    if(err.isAppError){
+		res.status(err.errorCode);
+		res.json(err);
+	    } else {
+		res.status(500);
+		res.json({});
+	    }
+	    return;
+	}
+	if(!user){
+	    var error = AppError.throwAppError(401, "Unauthorized");
+	    res.status(error.errorCode);
+	    res.json(error);
+	    return;
+	}
+	res.status(200);
+	res.json(user);
+    })(req, res, next);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

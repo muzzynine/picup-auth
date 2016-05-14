@@ -15,155 +15,116 @@ var log = bunyan.getLogger('DataModelLogger');
 
 
 module.exports = function(connection){
-    var Auth = connection.define(AuthScheme.TABLE, AuthScheme.SCHEME);
+    var Auth = connection.define(AuthScheme.TABLE, AuthScheme.SCHEME, AuthScheme.OPTION);
 
     Auth.authenticate = function(accessToken, authType){
-	return new Promise(function(resolve, reject){
-            if(authType === config.OAUTH.TYPE.KAKAO){
-		return Kakao.getUserInfo(accessToken).then(function(info){
-                    return Auth.getAuthInfoByOAuthId(info.id, authType).then(function(auth){
-                       resolve(auth, info);
-                    }).catch(function(err){
-                       /* 이 부분은 두가지 곳에서 두가지 목적으로 쓰인다.
-                       * 하나는 모든 에러를 잡는 인증용도이고, 다른 하나는 500 에러만 잡는 용도이다.
-                       * 따라서 여기서는 그대로 #findUserByOAuthId에서 발생하는 에러를 상위로 던진다.
-                       * Mongo Legacy.
-                       */
-			err.info = info;
-			throw err;
-                   });
-		}).catch(function(err){
-		    if(err.isAppError){
-			return reject(err);
-		    }
-		    reject(AppError.throwAppError(500, err.toString()));
-               });
-           } else if (authType === config.OAUTH.TYPE.FACEBOOK){
-               return Facebook.getUserInfo(accessToken).then(function(info){
-                   return Auth.getAuthInfoByOAuthId(info.id, authType).then(function(auth){
-                       resolve(auth, info);
-                   }).catch(function(err){
-                       /* 이 부분은 두가지 곳에서 두가지 목적으로 쓰인다.
-                        * 하나는 모든 에러를 잡는 인증용도이고, 다른 하나는 500 에러만 잡는 용도이다.
-                        * 따라서 여기서는 그대로 #findUserByOAuthId에서 발생하는 에러를 상위로 던진다.
-                        * Mongo Legacy.
-                        */
-                       err.info = info;
-                       throw err;
-                   });
-               }).catch(function(err){
-		   if(err.isAppError){
-		       return reject(err);
-		   }
-		   reject(AppError.throwAppError(500, err.toString()));
-
-               });
-           }
-            else {
-		reject(AppError.throwAppError(412, "Not supported 3rd party auth type"));
-           }
-       })
+        if(authType === config.OAUTH.TYPE.KAKAO){
+	    return Kakao.getUserInfo(accessToken).then(function(info){
+                return Auth.getAuthInfoByOAuthId(info.id, authType).then(function(auth){
+                    return auth;
+                }).catch(function(err){
+                    /* 이 부분은 두가지 곳에서 두가지 목적으로 쓰인다.
+                     * 하나는 모든 에러를 잡는 인증용도이고, 다른 하나는 500 에러만 잡는 용도이다.
+                     * 따라서 여기서는 그대로 #findUserByOAuthId에서 발생하는 에러를 상위로 던진다.
+                     * Mongo Legacy.
+                     */
+		    err.info = info;
+		    throw err;
+                });
+	    });
+        } else if (authType === config.OAUTH.TYPE.FACEBOOK){
+            return Facebook.getUserInfo(accessToken).then(function(info){
+                return Auth.getAuthInfoByOAuthId(info.id, authType).then(function(auth){
+                    return auth;
+                }).catch(function(err){
+                    /* 이 부분은 두가지 곳에서 두가지 목적으로 쓰인다.
+                     * 하나는 모든 에러를 잡는 인증용도이고, 다른 하나는 500 에러만 잡는 용도이다.
+                     * 따라서 여기서는 그대로 #findUserByOAuthId에서 발생하는 에러를 상위로 던진다.
+                     * Mongo Legacy.
+                     */
+                    err.info = info;
+                    throw err;
+                });
+            });
+        }
+        else {
+	    throw AppError.throwAppError(412, "Not supported 3rd party auth type");
+        }
     };
 
     Auth.getUser = function(auth){
-        return new Promise(function(resolve, reject){
-            auth.getUser().then(function(user){
-                if(!user){
-                    throw AppError.throwAppError(404, "Not exist user info match with auth info");
-                }
-                resolve(user);
-            }).catch(function(err){
-		if(err.isAppError){
-		    return reject(err);
-		}
-		reject(AppError.throwAppError(500, err.toString()));
-            });
+        return auth.getUser({
+	    where : {
+		isAlive : true
+	    }
+	}).then(function(user){
+            if(!user){
+                throw AppError.throwAppError(404, "Not exist user info match with auth info");
+            }
+            return user;
         });
     };
 
     Auth.getAccessToken = function(auth){
-        return new Promise(function(resolve, reject){
-            return auth.getAccessToken().then(function (token) {
-                if (!token) {
-                    return reject(AppError.throwAppError(404), "Not exist token");
-                }
-                resolve(token);
-            }).catch(function(err){
-		if(err.isAppError){
-		    reject(err);
-		} else {
-                    reject(AppError.throwAppError(500, err.toString()));
-		}
-            });
+        return auth.getAccessToken({
+	    where : {
+		isAlive : true
+	    }
+	}).then(function (token) {
+            if (!token) {
+                throw AppError.throwAppError(404, "Not exist token");
+            }
+            return token;
         });
     };
 
     Auth.generateClientKey = function(auth){
-        return new Promise(function(resolve, reject){
-	    auth.getClient().then(function(client){
-		if(client){
-		    resolve({
-			id : client.client_id,
-			secret : client.client_secret
-		    });
-		} else {
-		    var newClient = {
-			id : utils.getSHA1HashString(),
-			secret : utils.getSHA1HashString()
-		    };
-		    return auth.createClient({
-			client_id : newClient.id,
-			client_secret : newClient.secret
-		    }).then(function(){
-			resolve(newClient);
-		    });
-		}
-	    }).catch(function(err){
-		if(err.isAppError){
-		    return reject(err);
-		}
-		reject(AppError.throwAppError(500, err.toString()));
-            });
-        })
+	return auth.getClient({
+	    where : {
+		isAlive : true
+	    }
+	}).then(function(client){
+	    if(client){
+		return client;
+	    } else {
+		return auth.createClient({
+		    clientId : utils.getSHA1HashString(),
+		    clientSecret : utils.getSHA1HashString()
+		}).then(function(client){
+		    return client;
+		});
+	    }
+	});
     };
 
     Auth.verifyClient = function(auth, clientId, clientSecret){
-        return new Promise(function(resolve, reject){
-            return auth.getClient().then(function(client){
-                if(!client){
-                    throw AppError.throwAppError(404, "Not exist client");
-                }
-                if(client.client_id === clientId && client.client_secret === clientSecret){
-                    return resolve(auth);
-                }
-                throw AppError.throwAppError(401, "Client id, client secret authentication failed");
-            }).catch(function(err){
-		if(err.isAppError){
-		    return reject(err);
-		}
-		reject(AppError.throwAppError(500, err.toString()));
-            });
+        return auth.getClient({
+	    where : {
+		isAlive : true
+	    }
+	}).then(function(client){
+            if(!client){
+                throw AppError.throwAppError(404, "Not exist client");
+            }
+            if(client.clientId === clientId && client.clientSecret === clientSecret){
+                return auth;
+            }
+            throw AppError.throwAppError(401, "Client id, client secret authentication failed");
         });
     };
 
     Auth.getAuthInfoByOAuthId = function(id, authType){
-        return new Promise(function(resolve, reject){
-            return Auth.findOne({
-                where : {
-                    auth_id: id,
-                    auth_type: authType
-                }
-            }).then(function(auth){
-                if(!auth){
-                    throw AppError.throwAppError(404, "Not exist auth info");
-                }
-                resolve(auth);
-            }).catch(function(err){
-		if(err.isAppError){
-		    return reject(err);
-		}
-		reject(AppError.throwAppError(500, err.toString()));
-            });
+        return Auth.findOne({
+            where : {
+                authId: id,
+                authType : authType,
+		isAlive : true
+            }
+        }).then(function(auth){
+            if(!auth){
+                throw AppError.throwAppError(404, "Not exist auth info");
+            }
+            return auth;
         });
     };
 

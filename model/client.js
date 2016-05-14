@@ -10,34 +10,6 @@ var log = bunyan.getLogger('DataModelLogger');
 
 
 module.exports = function(connection){
-    var Client = connection.define(ClientScheme.TABLE, ClientScheme.SCHEME);
+    return connection.define(ClientScheme.TABLE, ClientScheme.SCHEME, ClientScheme.OPTION);
 
-    Client.getAuthInfo = function(clientId, clientSecret){
-        return new Promise(function(resolve, reject){
-            return Client.findOne({
-                where : {
-                    client_id : clientId,
-                    client_secret : clientSecret
-                }
-            }).then(function(client){
-                if(!client){
-                    return reject(AppError.throwAppError(404));
-                }
-                return client.getAuth().then(function(auth){
-                    if(!auth){
-                        return reject(AppError.throwAppError(404));
-                    }
-                    resolve(null, auth);
-                }).catch(function(err){
-                    log.error("Client#getAuthInfo", {err: err});
-                    reject(AppError.throwAppError(500));
-                })
-            }).catch(function(err){
-                log.error("Client#getAuthInfo", {err: err});
-                reject(AppError.throwAppError(500));
-            })
-        })
-    };
-
-    return Client;
 };

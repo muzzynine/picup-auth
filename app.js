@@ -11,7 +11,8 @@ var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('MainLogger');
-
+var SessionStore = require('./lib/session');
+var Promise = require('bluebird');
 
 var oauth = require('./lib/oauth2');
 var auth = require('./lib/auth');
@@ -19,12 +20,20 @@ var auth = require('./lib/auth');
 var app = express();
 
 app.set('models', require('./model'));
+//session setup
+//app.set('session', new SessionStore(config.SESSION));
 
 if(process.env.NODE_ENV == 'development'){
-    console.log("Server running Development Mode");
+    log.info("Server running Development Mode");
     app.use(require('morgan')('dev'));
+
+    //Sequelize query log printed std out
+    Promise.config({
+	warnings : true
+    });
+
 } else if(process.env.NODE_ENV == 'production'){
-    console.log("Server running Production Mode");
+    log.info("Server running Production Mode");
     process.on('uncaughtException', function(err){
 	log.fatal("UncaughtExceptionEmit", {err : err.toString()}, {stack : err.stack});
     });
@@ -35,10 +44,17 @@ app.use(bodyParser.urlencoded({extended : false}));
 
 app.use(passport.initialize());
 app.use(passport.session());
-//auth.setSession(app);
 
 auth.setPassportStrategy();
 oauth.init();
+
+
+app.get('/health', function(req, res, next){
+    res.status(200);
+    res.json({});
+    return;
+});
+
 
 var membershipRouter = require('./router/membershipRouter');
 var oauthRouter = require('./router/oauthRouter');

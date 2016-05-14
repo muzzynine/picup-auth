@@ -8,22 +8,6 @@ var bunyan = require('bunyan');
 var log = bunyan.getLogger('DataModelLogger');
 
 module.exports = function(connection){
-    var Delta =  connection.define(DeltaScheme.TABLE, DeltaScheme.SCHEME);
-
-    Delta.findDeltaById = function(id){
-        return new Promise(function(resolve, reject){
-            return Delta.findById(id).then(function(delta){
-                if(!delta){
-                    return reject(AppError.throwAppError(404));
-                }
-                resolve(delta);
-            }).catch(function(err){
-                log.error("Delta#findDeltaById", {err: err});
-                reject(AppError.throwAppError(500));
-            });
-        })
-    };
-
-
-    return Delta;
+    return  connection.define(DeltaScheme.TABLE, DeltaScheme.SCHEME, DeltaScheme.OPTION);
 };
+

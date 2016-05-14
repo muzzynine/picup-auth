@@ -13,7 +13,7 @@ module.exports = {
 
     DB: {
         MYSQL: {
-            HOST: 'bigfrfog-picup.cpcmirt0kyjt.ap-northeast-2.rds.amazonaws.com',
+	    HOST : 'bigfrog-picup.cluster-cqm2majqgqx4.ap-northeast-1.rds.amazonaws.com',
             DATABASE: 'picup',
             PROTOCOL: 'mysql',
             PORT: 3306,
@@ -22,9 +22,10 @@ module.exports = {
         }
     },
 
-    redis : {
-        addr : 'localhost',
-        port : 6379
+    SESSION : {
+	url : 'redis://picup-session.ui4wps.0001.apne1.cache.amazonaws.com:6379',
+	//develop option
+	disableTTL : true
     },
 
     OAUTH: {
