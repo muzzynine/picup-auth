@@ -11,7 +11,7 @@ var passport = require('passport');
 var logging = require('./lib/logger');
 var bunyan = require('bunyan');
 var log = bunyan.getLogger('MainLogger');
-var SessionStore = require('./lib/session');
+//var SessionStore = require('./lib/session');
 var Promise = require('bluebird');
 
 var oauth = require('./lib/oauth2');
@@ -43,7 +43,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
 
 app.use(passport.initialize());
-app.use(passport.session());
+//app.use(passport.session());
 
 auth.setPassportStrategy();
 oauth.init();
