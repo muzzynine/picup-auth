@@ -21,12 +21,13 @@ module.exports = {
             PASSWORD: 'su1c1delog1c'
         }
     },
-
+/*
     SESSION : {
 	url : 'redis://picup-session.ui4wps.0001.apne1.cache.amazonaws.com:6379',
 	//develop option
 	disableTTL : false
     },
+*/
 
     OAUTH: {
         TYPE: {
