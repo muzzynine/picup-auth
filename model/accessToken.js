@@ -18,7 +18,7 @@ module.exports = function(connection){
             }
         }).then(function(token){
             if(!token){
-                throw AppError.throwAppError(404, "Not exist token");
+                throw AppError.throwAppError(404, "Not exist token" + "accessToken : " + inputToken);
             }
             return token;
         });
